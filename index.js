@@ -23,29 +23,17 @@ app.get("/", (req, res) => {
   res.send("✅ Bot server is running!");
 });
 
-// Webhook nhận Feedback từ AppSheet
+// Webhook nhận dữ liệu từ AppSheet
 app.post("/webhook", async (req, res) => {
-  const data = req.body;
-  console.log("📥 Webhook received:", data);
+  const { discord_id, content } = req.body;
 
-  const userId = data.discord_id;
-  const jobName = data["Job Name"] || data.job_name || "Không rõ Job";
-  const clientName = data.Client || data.client || "Không rõ khách";
-  const fbText = data.FBkhach || data.fb || "";
-
-  if (!userId || !fbText) {
-    return res.status(400).send("Thiếu discord_id hoặc FBkhach.");
+  if (!discord_id || !content) {
+    return res.status(400).send("Thiếu discord_id hoặc content.");
   }
 
-  const messageText =
-    `📝 **Feedback khách hàng mới**:\n` +
-    `📌 Job: **${jobName}**\n` +
-    `👥 Khách: **${clientName}**\n` +
-    `>>> ${fbText}`;
-
   try {
-    const user = await client.users.fetch(userId);
-    await user.send(messageText);
+    const user = await client.users.fetch(discord_id);
+    await user.send(content);
     console.log(`✅ Đã gửi feedback tới user ${user.tag}`);
     res.status(200).send("Đã gửi feedback thành công.");
   } catch (error) {
